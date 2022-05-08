@@ -59,7 +59,6 @@ const MINT_NFT_FEE: Balance = 1_000_000_000_000_000_000_000_00;
 const AUCTION_FEE: Balance = 1_000_000_000_000_000_000_000_000;
 #[near_bindgen]
 impl MarketPlace {
-    // Init Marketplace
     #[init]
     pub fn new() -> Self {
         assert!(!env::state_exists(), "Already initialized");
@@ -81,7 +80,6 @@ impl MarketPlace {
         }
     }
 
-    // Mint TokenId
     #[payable]
     pub fn mint(
         &mut self,
@@ -127,6 +125,11 @@ impl MarketPlace {
 
     pub fn nft_token(self, token_id: TokenId) -> Option<Token> {
         self.tokens.nft_token(token_id)
+    }
+
+    // đây là hàm để xem thông tin của auction
+    pub fn get_auction(&mut self, auction_id: u128) -> Auction {
+        self.auction_by_id.get(&auction_id).unwrap()
     }
 
     // Create Auction
@@ -230,7 +233,7 @@ impl MarketPlace {
         auction.current_price = env::attached_deposit();
         self.auction_by_id.insert(&auction_id, &auction);
     }
-
+    // rut near về nếu là người thua đấu giá
     #[payable]
     pub fn claim_near(&mut self, auction_id: u128) {
         let mut auction = self.auction_by_id.get(&auction_id).unwrap_or_else(|| {
@@ -257,6 +260,7 @@ impl MarketPlace {
         self.auction_by_id.insert(&auction_id, &auction);
     }
 
+    // nếu là người thắng sẽ được claim nft
     #[payable]
     pub fn claim_nft(&mut self, auction_id: u128) {
         let mut auction = self.auction_by_id.get(&auction_id).unwrap_or_else(|| {
@@ -290,6 +294,7 @@ impl MarketPlace {
         self.auction_by_id.insert(&auction_id, &auction);
     }
 
+    // đây là hàm trả lại nft nếu không có ai đặt cược
     #[payable]
     pub fn return_nft(&mut self, auction_id: u128) {
         let mut auction = self.auction_by_id.get(&auction_id).unwrap_or_else(|| {
